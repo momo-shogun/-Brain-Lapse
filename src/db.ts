@@ -3,7 +3,7 @@ import { Schema, Types } from "mongoose";
 
 mongoose.connect('mongodb://localhost:27017/brain')
 
-const contentTypes = ["video", "audio", "article", "image"]
+const contentTypes = ["video", "audio", "document", "image"]
 
 const userSchema = new Schema({
     username: { type: String, required: true, unique: true },
