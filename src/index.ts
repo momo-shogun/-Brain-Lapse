@@ -5,6 +5,7 @@ import { z } from 'zod'
 import bcrypt from 'bcrypt'
 import { JWT_SECRET } from "./config";
 import { auth } from "./middleware/auth";
+import { hashGen } from "./utils";
 
 const app = express();
 const salt: number = 5;
@@ -53,7 +54,7 @@ app.post("/api/v1/signin", async (req, res) => {
     if (!passwordValid) {
         return res.json({ message: "Invalid Creditials" })
     }
-    const token = jwt.sign({ id: user.id }, JWT_SECRET)
+    const token = jwt.sign({ id: user._id }, JWT_SECRET)
 
     return res.json({ token: token })
 
@@ -83,7 +84,7 @@ app.get("/api/v1/content", auth, async (req, res) => {
     const content = await contentModel.find({
         //@ts-ignore
         userId: req.userId
-    }, 'link type title tag')
+    }, 'link type title tag userId').populate({ path: 'userId', select: 'username -_id' })
 
     if (!content) {
         return res.json({ message: "nothing exits" })
@@ -91,7 +92,7 @@ app.get("/api/v1/content", auth, async (req, res) => {
     res.json({ content })
 })
 
-app.delete("/api/v1/content", auth,async (req, res) => {
+app.delete("/api/v1/content", auth, async (req, res) => {
     const contentId = req.body.contentId
     try {
         await contentModel.deleteOne({
@@ -105,21 +106,68 @@ app.delete("/api/v1/content", auth,async (req, res) => {
         })
     } catch (error) {
         console.error(error)
-        res.json({error:error,msg:"did you provide content id"})
+        res.json({ error: error, msg: "did you provide content id" })
     }
 })
 
-app.post("/api/v1/brain/share",auth, async (req, res) => {
-    const link = await linkModel.findOne({
+app.post("/api/v1/brain/share", auth, async (req, res) => {
+    const share = req.body.share
+    console.log(typeof share);
+    if (share === "false") {
+        await linkModel.deleteOne({
+            //@ts-ignore
+            userId: req.userId
+        })
+        res.json({ message: "share link deleted" })
+        return
+    }
+    if (!share) {
+        res.json({ message: "is not avialble" })
+        return
+    }
+
+    //checking if the link already exits 
+    const existingLink = await linkModel.findOne({
         //@ts-ignore
-        userId:req.userId
+        userId: req.userId
     })
-    if(!link){
-        link = await linkModel.update
+    if (existingLink) {
+        res.json({
+            "link": "http://localhost:3000/api/v1/brain/" + existingLink.hash
+        })
+        return
     }
+    // if the link doesnt exits
+    const hash = hashGen(7)
+    const linkCreated = await linkModel.create({
+        hash,
+        //@ts-ignore
+        userId: req.userId
+    })
+
+    if (!linkCreated) {
+        res.json({ message: "error duing db file creation" })
+        return
+    }
+
+    res.json({
+        "link": "http://localhost:3000/api/v1/brain/" + hash
+    })
+
 })
 
-app.get("/api/v1/brain/:shareLink", (req, res) => {
+app.get("/api/v1/brain/:shareLink", async (req, res) => {
+    const shareLink = req.params.shareLink
+    if (!shareLink) {
+        res.json({ message: "invaliad || sharing is not allowed" })
+        return
+    }
+    const link = await linkModel.findOne({ hash: shareLink }).populate({ path: 'userId', select: 'username -_id' });
+    if (!link) {
+        res.json({ message: "user brain not public" })
+
+    }
+    res.json({ message: link })
 
 })
 
