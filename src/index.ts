@@ -1,44 +1,47 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import { contentModel, linkModel, userModel } from './db'
-import { z } from 'zod'
-import bcrypt from 'bcrypt'
-import { JWT_SECRET } from "./config";
-import { auth } from "./middleware/auth";
-import { hashGen } from "./utils";
-
+import express from 'express';
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
+import { contentModel, linkModel, userModel } from './db'; // Adjust as per your db import
+import { JWT_SECRET } from "./config"; // If needed
+import { auth } from "./middleware/auth"; // If needed
+import { hashGen } from "./utils"; // If needed
+import jwt from 'jsonwebtoken';
 const app = express();
 const salt: number = 5;
 app.use(express.json());
-
-
 const zsignupSchema = z.object({
     username: z.string().min(3).max(10),
-    password: z.string().min(8).max(20) //add should have atleast one uppercase, one lowercase, one special character, one number
+    password: z.string().min(8).max(20) // Should have at least one uppercase, one lowercase, one special character, one number
 });
 
-type signupSchema = z.infer<typeof zsignupSchema>
+type signupSchema = z.infer<typeof zsignupSchema>;
 
 app.post("/api/v1/signup", async (req, res) => {
-    const { username, password }: signupSchema = req.body
-    const validationResult = zsignupSchema.safeParse({ username, password })
+    const { username, password }: signupSchema = req.body;
+    const validationResult = zsignupSchema.safeParse({ username, password });
 
     if (!validationResult.success) {
-        return res.status(411).json({ error: validationResult.error.errors })
+        res.status(411).json({ error: validationResult.error.errors });
+        return
     }
 
     try {
-        const hash = await bcrypt.hash(password, salt)
-        await userModel.create({ username, password: hash })
-        return res.status(200).json({ message: "Signed up " })
+        const hash = await bcrypt.hash(password, salt);
+        await userModel.create({ username, password: hash });
+        res.status(200).json({ message: "Signed up" });
+        return
     } catch (error: any) {
         console.error("Error during signup:", error);
 
         if (error.code === 11000) {
-            return res.status(403).json({ message: "user already exits, do signin" })
+            res.status(403).json({ message: "User already exists, please sign in" });
+            return
         }
+
+        res.status(500).json({ message: "Internal server error" });
     }
-})
+});
+
 
 
 app.post("/api/v1/signin", async (req, res) => {
@@ -47,16 +50,19 @@ app.post("/api/v1/signin", async (req, res) => {
     const user = await userModel.findOne({ username: username })
 
     if (!user) {
-        return res.json({ message: "user doesnt exist" })
+        res.json({ message: "user doesnt exist" })
+        return
     }
 
     const passwordValid: boolean = await bcrypt.compare(password, user.password)
     if (!passwordValid) {
-        return res.json({ message: "Invalid Creditials" })
+        res.json({ message: "Invalid Creditials" })
+        return
     }
     const token = jwt.sign({ id: user._id }, JWT_SECRET)
 
-    return res.json({ token: token })
+    res.json({ token: token })
+    ReadableStreamDefaultController
 
 
 })
@@ -87,7 +93,8 @@ app.get("/api/v1/content", auth, async (req, res) => {
     }, 'link type title tag userId').populate({ path: 'userId', select: 'username -_id' })
 
     if (!content) {
-        return res.json({ message: "nothing exits" })
+        res.json({ message: "nothing exits" })
+        return
     }
     res.json({ content })
 })

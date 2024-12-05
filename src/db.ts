@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 mongoose.connect('mongodb://localhost:27017/brain')
 

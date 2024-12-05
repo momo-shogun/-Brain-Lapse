@@ -18,6 +18,7 @@ export function auth(req: Request, res: Response, next: NextFunction) {
         next()
     }
     else {
-        return res.status(403).json({ message: "You are not logged in" })
+        res.status(403).json({ message: "You are not logged in" })
+        return
     }
 }
