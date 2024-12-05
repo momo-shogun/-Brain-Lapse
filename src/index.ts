@@ -6,9 +6,14 @@ import { JWT_SECRET } from "./config"; // If needed
 import { auth } from "./middleware/auth"; // If needed
 import { hashGen } from "./utils"; // If needed
 import jwt from 'jsonwebtoken';
+const cors = require('cors')
+
 const app = express();
 const salt: number = 5;
+
 app.use(express.json());
+app.use(cors())
+
 const zsignupSchema = z.object({
     username: z.string().min(3).max(10),
     password: z.string().min(8).max(20) // Should have at least one uppercase, one lowercase, one special character, one number
@@ -50,7 +55,7 @@ app.post("/api/v1/signin", async (req, res) => {
     const user = await userModel.findOne({ username: username })
 
     if (!user) {
-        res.json({ message: "user doesnt exist" })
+        res.status(401).json({ message: "User doesn't exist, SignUp First" })
         return
     }
 
@@ -62,24 +67,26 @@ app.post("/api/v1/signin", async (req, res) => {
     const token = jwt.sign({ id: user._id }, JWT_SECRET)
 
     res.json({ token: token })
-    ReadableStreamDefaultController
 
 
 })
 
 app.post("/api/v1/content", auth, async (req, res) => {
-    const link = req.body.link
-    const type = req.body.type
+    const { link, type, title, tags, description
+    } = req.body
+
 
     try {
         await contentModel.create({
             link, type,
-            title: req.body.title,
+            title,
+            tags,
+            description,
             //@ts-ignore
             userId: req.userId
         })
 
-        res.json({ message: "content added" })
+        res.status(415).json({ message: "content added" })
     } catch (error) {
         console.error(error)
         res.json({ error })
@@ -93,7 +100,7 @@ app.get("/api/v1/content", auth, async (req, res) => {
     }, 'link type title tag userId').populate({ path: 'userId', select: 'username -_id' })
 
     if (!content) {
-        res.json({ message: "nothing exits" })
+        res.status(204).json({ message: "nothing exits" })
         return
     }
     res.json({ content })
@@ -119,7 +126,6 @@ app.delete("/api/v1/content", auth, async (req, res) => {
 
 app.post("/api/v1/brain/share", auth, async (req, res) => {
     const share = req.body.share
-    console.log(typeof share);
     if (share === "false") {
         await linkModel.deleteOne({
             //@ts-ignore

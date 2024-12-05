@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from 'mongoose';
+import { string } from "zod";
 
 mongoose.connect('mongodb://localhost:27017/brain')
 
@@ -30,6 +31,7 @@ const contentSchema = new Schema({
 
     },
     tag: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+    description: String,
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now() }
 
