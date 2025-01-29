@@ -1,9 +1,14 @@
 import { useSidebar } from "@/components/ui/sidebar";
 import { Brain, Plus, Share2 } from "lucide-react";
 import { Button } from "../ui/button";
+import axios from "axios";
+import { URl } from "./lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 const Header = () => {
   const { isMobile, toggleSidebar } = useSidebar();
+
   return (
     <>
       <header className="bg-white">

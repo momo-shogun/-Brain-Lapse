@@ -89,15 +89,13 @@ app.post("/api/v1/content", auth, async (req, res) => {
 });
 
 app.get("/api/v1/content", auth, async (req, res) => {
-  const content = await contentModel
-    .find(
-      {
-        //@ts-ignore
-        userId: req.userId,
-      },
-      "link type title tag userId"
-    )
-    .populate({ path: "userId", select: "username -_id" });
+  const content = await contentModel.find(
+    {
+      //@ts-ignore
+      userId: req.userId,
+    },
+    "link type title tag createdAt"
+  );
 
   if (!content) {
     res.status(204).json({ message: "nothing exits" });
