@@ -19,7 +19,6 @@ function App() {
               <Route index element={<SignUp />} />
               <Route path="/login" element={<Login />} />
             </Route>
-
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>

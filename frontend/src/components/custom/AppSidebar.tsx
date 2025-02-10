@@ -29,11 +29,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-5">Tweets</SidebarMenuButton>
-                <SidebarMenuButton className="py-5">Video</SidebarMenuButton>
-                <SidebarMenuButton className="py-5">Document</SidebarMenuButton>
-                <SidebarMenuButton className="py-5">Links</SidebarMenuButton>
-                <SidebarMenuButton className="py-5">Tags</SidebarMenuButton>
+                <SidebarMenuButton className="py-5 ps-14" size="lg">Tweets</SidebarMenuButton>
+                <SidebarMenuButton className="py-5 ps-14" size="lg">Video</SidebarMenuButton>
+                <SidebarMenuButton className="py-5 ps-14" size="lg">Document</SidebarMenuButton>
+                <SidebarMenuButton className="py-5 ps-14" size="lg">Links</SidebarMenuButton>
+                <SidebarMenuButton className="py-5 ps-14" size="lg">Tags</SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
