@@ -1,21 +1,11 @@
 import { useSidebar } from "@/components/ui/sidebar";
-import { Brain, Plus, Share2 } from "lucide-react";
+import { Brain, Share2 } from "lucide-react";
 import { Button } from "../ui/button";
-// import axios from "axios";
-// import { URl } from "./lib/utils";
-import { useState } from "react";
 import { AddContentModal } from "./AddContent";
 
 const Header = () => {
   const { isMobile, toggleSidebar } = useSidebar();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleShowContent = () => {
-    setIsModalOpen(true);
-  };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
   return (
     <>
       <header className="bg-white">
@@ -44,10 +34,7 @@ const Header = () => {
                 <Share2 size={20} />
                 <span className="text-sm font-medium"> Share Brain </span>
               </Button>
-
-              
-        <AddContentModal />
-
+              <AddContentModal />
             </div>
           </div>
         </div>

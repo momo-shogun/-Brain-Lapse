@@ -15,8 +15,21 @@ app.use(express.json());
 app.use(cors());
 
 const zsignupSchema = z.object({
-  username: z.string().min(3).max(10),
-  password: z.string().min(8).max(20), // Should have at least one uppercase, one lowercase, one special character, one number
+  username: z
+    .string()
+    .min(3, { message: "Username Must be 3 or more characters" })
+    .max(10, { message: "Username Must be 10 or less characters" }),
+  password: z
+    .string()
+    .min(8, { message: "Password Must be 8 or more characters" })
+    .max(20, { message: "Password Must be 20 or less characters" }), // Should have at least one uppercase, one lowercase, one special character, one number
+});
+const zContentSchema = z.object({
+  link: z.string().url({ message: "Invalid URL" }).optional().or(z.literal("")), // Allow empty string
+  type: z.string().min(1, { message: "Type is required" }), // Ensure type is required
+  title: z.string().min(1, { message: "Title is required" }), // Ensure title is required
+  tags: z.array(z.string()).optional(), // Tags should be an array of strings
+  description: z.string().optional(), // Description is optional
 });
 
 type signupSchema = z.infer<typeof zsignupSchema>;
@@ -68,23 +81,27 @@ app.post("/api/v1/signin", async (req, res) => {
 });
 
 app.post("/api/v1/content", auth, async (req, res) => {
-  const { link, type, title, tags, description } = req.body;
-
-  try {
+  try{
+    const parsedData = zContentSchema.parse({
+      link: req.body.link || "", // Default to empty string if not provided
+      type: req.body.type,
+      title: req.body.title,
+      tags: req.body.tags || [],
+      description: req.body.description || "",
+    });
     await contentModel.create({
-      link,
-      type,
-      title,
-      tags,
-      description,
+      ...parsedData,
       //@ts-ignore
       userId: req.userId,
     });
-
-    res.status(415).json({ message: "content added" });
-  } catch (error) {
+  
+    res.status(201).json({ message: "Content added successfully" }); 
+} catch (error) {
     console.error(error);
-    res.json({ error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ errors: error.errors });
+    }
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

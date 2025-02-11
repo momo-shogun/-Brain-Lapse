@@ -7,7 +7,7 @@ const fileType: Record<contentType, LucideIcon> = {
   image: Link2,
 };
 
-type contentType = "video" | "tweet" | "document" | "image";
+export type contentType = "video" | "tweet" | "document" | "image";
 
 export function TypeIcon({ type }: { type: contentType }) {
   const iconClass = "text-stone-400";

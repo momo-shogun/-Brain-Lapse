@@ -26,13 +26,14 @@ export const Login = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.token);
       navigate("/dashboard");
     },
     onError: (error: any) => {
       console.error(
         "Login failed:",
-        error.response?.data?.message || error.message
+        error.response?.data?.error[0].message || error.message
       );
     },
   });

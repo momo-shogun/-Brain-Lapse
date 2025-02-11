@@ -19,7 +19,7 @@ export const tagModel = mongoose.model('Tag', tagSchema)
 
 const contentSchema = new Schema({
     link: {
-        type: String, required: true
+        type: String,
 
     },
     type: {

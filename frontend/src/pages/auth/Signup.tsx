@@ -32,23 +32,16 @@ export const SignUp = () => {
       console.log("Sign Up successful:", data);
       navigate("/login");
     },
-    onError: (error: any) => {
+    onError: (error: any) => {      
       console.error(
         "Sign Up failed:",
-        error.response?.data?.message || error.message
+        error.response?.data?.error[0].message || error.message
       );
     },
   });
 
   return (
-    // <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-    //   <aside className="relative block h-16  lg:col-span-5 lg:h-full xl:col-span-6">
-    //     <img
-    //       alt=""
-    //       src="https://imgs.search.brave.com/leDqfaLKswP4nLM02JJsCJFK7sLjt1cHNDs0VDpAiYg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by9wdXJwbGUtbW9k/ZWwtaHVtYW4tYnJh/aW4tYWdhaW5zdC1w/dXJwbGVfMTAwOTkw/Mi0xNDg2MzUuanBn/P3NpemU9NjI2JmV4/dD1qcGc"
-    //       className="absolute inset-0 h-full w-full object-cover"
-    //     />
-    //   </aside>
+    
     <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
       <div className="max-w-xl lg:max-w-3xl">
         <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
@@ -84,7 +77,7 @@ export const SignUp = () => {
           <div className="pt-4">
             {mutation.isError && (
               <div className="text-red-500 text-sm pb-2">
-                {mutation.error.response?.data?.message || "An error occurred"}
+                {mutation.error.response?.data?.error[0].message || "An error occurred"}
               </div>
             )}
             {mutation.isSuccess && (
@@ -117,6 +110,6 @@ export const SignUp = () => {
         </div>
       </div>
     </main>
-    // </div>
+ 
   );
 };

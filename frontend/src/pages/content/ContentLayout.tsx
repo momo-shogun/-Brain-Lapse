@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Share2, Trash2 } from "lucide-react";
+import { Share2, Terminal, Trash2 } from "lucide-react";
 
 export interface contentProps {
   link?: string;
@@ -21,16 +21,17 @@ import { formatDate, URl } from "@/lib/utils";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Key, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function ContentLayout() {
   const [contentData, setContentData] = useState<contentProps[]>();
-
+  const navigate = useNavigate();
   const query = useQuery({
     queryKey: ["getContent"],
     queryFn: async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("User is not authenticated.");
+        navigate("/login");
       }
       const response = await axios.get(`${URl}/content`, {
         headers: {
@@ -54,36 +55,40 @@ function ContentLayout() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 sm:mx-10 mx-4">
-      {query.data?.map(
-        (content: contentProps, index: Key | null | undefined) => (
-          <Card key={index} className="">
-            <CardHeader className="py-2">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                  <TypeIcon type={content.type} />
-                  <CardTitle>{content.title}</CardTitle>
+    <>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 sm:mx-10 mx-4">
+        {query.data?.map(
+          (content: contentProps, index: Key | null | undefined) => (
+            <Card key={index} className="">
+              <CardHeader className="py-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-2">
+                    <TypeIcon type={content.type} />
+                    <CardTitle>{content.title}</CardTitle>
+                  </div>
+                  <div className="flex">
+                    <Button size="icon" variant={"ghost"}>
+                      <Share2 />
+                    </Button>
+                    <Button size="icon" variant={"ghost"}>
+                      <Trash2 />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex">
-                  <Button size="icon" variant={"ghost"}>
-                    <Share2 />
-                  </Button>
-                  <Button size="icon" variant={"ghost"}>
-                    <Trash2 />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p>{content.description ? content.description : null}</p>
-            </CardContent>
-            <CardFooter>
-              <p>{formatDate(content.createdAt)}</p>
-            </CardFooter>
-          </Card>
-        )
-      )}
-    </div>
+              </CardHeader>
+              <CardContent>
+                <p>{content.description ? content.description : null}</p>
+              </CardContent>
+              <CardFooter>
+                <p>{formatDate(content.createdAt)}</p>
+              </CardFooter>
+            </Card>
+          )
+        )}
+        {query.isError && <p>Error: {query?.error?.message}</p>}
+      </div>
+      
+    </>
   );
 }
 
