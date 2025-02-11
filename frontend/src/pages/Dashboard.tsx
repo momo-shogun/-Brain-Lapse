@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/custom/AppSidebar";
 import Header from "@/components/custom/Header";
 import ContentLayout from "./content/ContentLayout";
+import { Toaster } from "@/components/ui/toaster";
 
 function Dashboard() {
   return (
@@ -14,6 +15,7 @@ function Dashboard() {
             <ContentLayout />
           </div>
         </main>
+        <Toaster />
       </SidebarProvider>
     </>
   );

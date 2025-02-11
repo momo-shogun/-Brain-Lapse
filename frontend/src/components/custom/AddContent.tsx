@@ -22,6 +22,8 @@ import { Textarea } from "../ui/textarea";
 import { contentType, TypeIcon } from "./TypeIcon";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 const contentTypes: { type: contentType; icon: any; label: string }[] = [
   { type: "video", icon: Video, label: "Video" },
@@ -29,6 +31,14 @@ const contentTypes: { type: contentType; icon: any; label: string }[] = [
   { type: "document", icon: FileText, label: "Document" },
   { type: "image", icon: Image, label: "Image" },
 ];
+
+const contentSchema = z.object({
+  link: z.string().url({ message: "Invalid URL" }).optional().or(z.literal("")), // Allow empty string
+  type: z.string().min(1, { message: "Type is required" }),
+  title: z.string().min(1, { message: "Title is required" }),
+  tags: z.array(z.string()).optional(),
+  description: z.string().optional(),
+});
 
 export function AddContentModal() {
   const [formData, setFormData] = useState({
@@ -50,19 +60,40 @@ export function AddContentModal() {
     },
     onSuccess: () => {
       console.log("data saved");
+      toast({
+        title: "Success",
+        description: "Content added successfully!",
+        variant: "default", 
+      });
     },
     onError: (error: any) => {
       console.error("Error during creation: ", error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong!",
+        variant: "destructive", 
+      });
     },
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+  const { toast } = useToast()
 
   const handleSave = () => {
-    mutation.mutate(formData)
-    setOpen(false);
+    const result = contentSchema.safeParse(formData);
+    if (result.success) {      
+      mutation.mutate(formData)
+      setOpen(false);
+    } else {
+      toast({
+        title: "Validation Error",
+        description: result.error.errors[0].message,
+        variant: "destructive", 
+      });
+    }
+  
   };
 
   return (

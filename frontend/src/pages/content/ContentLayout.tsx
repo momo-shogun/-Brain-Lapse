@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Share2, Terminal, Trash2 } from "lucide-react";
+import { Share2, Trash2 } from "lucide-react";
 
 export interface contentProps {
   link?: string;
@@ -22,6 +22,7 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Key, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { TwitterTweetEmbed } from "react-twitter-embed";
 
 function ContentLayout() {
   const [contentData, setContentData] = useState<contentProps[]>();
@@ -57,7 +58,7 @@ function ContentLayout() {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 sm:mx-10 mx-4">
-        {query.data?.map(
+        {contentData?.map(
           (content: contentProps, index: Key | null | undefined) => (
             <Card key={index} className="">
               <CardHeader className="py-2">
@@ -77,6 +78,28 @@ function ContentLayout() {
                 </div>
               </CardHeader>
               <CardContent>
+                <p>
+                  {content.link && content.type === "video" ? (
+                    <iframe
+                      width="100%"
+                      src={`https://www.youtube.com/embed/${content.link}`}
+                    ></iframe>
+                  ) : null}
+                </p>
+                <p>
+                  {content.link && content.type === "tweet" ? (
+                    <TwitterTweetEmbed tweetId={content.link} />
+                  ) : null}
+                </p>
+                <p>
+                  {content.link && content.type === "image" ? (
+                    <img
+                    src={content.link}
+                    alt=""
+                    className="aspect-square w-full rounded-lg object-cover"
+                  />
+                  ) : null}
+                </p>
                 <p>{content.description ? content.description : null}</p>
               </CardContent>
               <CardFooter>
@@ -87,7 +110,6 @@ function ContentLayout() {
         )}
         {query.isError && <p>Error: {query?.error?.message}</p>}
       </div>
-      
     </>
   );
 }

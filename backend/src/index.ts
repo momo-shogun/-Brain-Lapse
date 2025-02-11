@@ -4,7 +4,7 @@ import { z } from "zod";
 import { contentModel, linkModel, userModel } from "./db"; // Adjust as per your db import
 import { JWT_SECRET } from "./config"; // If needed
 import { auth } from "./middleware/auth"; // If needed
-import { hashGen } from "./utils"; // If needed
+import { extractTwitterLinkId, extractYoutubeLinkId, hashGen } from "./utils"; // If needed
 import jwt from "jsonwebtoken";
 const cors = require("cors");
 
@@ -81,22 +81,32 @@ app.post("/api/v1/signin", async (req, res) => {
 });
 
 app.post("/api/v1/content", auth, async (req, res) => {
-  try{
-    const parsedData = zContentSchema.parse({
+  try {
+    let parsedData = zContentSchema.parse({
       link: req.body.link || "", // Default to empty string if not provided
       type: req.body.type,
       title: req.body.title,
       tags: req.body.tags || [],
       description: req.body.description || "",
     });
+
+    //extract the  id from the link
+    if (parsedData.type === "video" && parsedData.link) {
+      parsedData.link = extractYoutubeLinkId(parsedData.link);
+    }
+    
+    if (parsedData.type === "tweet" && parsedData.link) {
+      parsedData.link = extractTwitterLinkId(parsedData.link);
+    }
+
     await contentModel.create({
       ...parsedData,
       //@ts-ignore
       userId: req.userId,
     });
-  
-    res.status(201).json({ message: "Content added successfully" }); 
-} catch (error) {
+
+    res.status(201).json({ message: "Content added successfully" });
+  } catch (error) {
     console.error(error);
     if (error instanceof z.ZodError) {
       res.status(400).json({ errors: error.errors });
